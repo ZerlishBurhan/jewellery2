@@ -22,6 +22,51 @@ const Cart = () => {
       return;
     }
 
+    // const fetchCart = async () => {
+    //   try {
+    //     const res = await fetch(`/api/cart/${userId}`);
+    //     if (!res.ok) throw new Error('Failed to load cart');
+
+    //     const cartData = await res.json();
+    //     console.log('Raw cart data from API:', cartData);
+
+    //     // Process items with proper array indexing
+    //     const items = await Promise.all(
+    //       cartData.productIds
+    //         .filter(pid => pid && typeof pid === 'string' && pid.length > 0) // filter out bad ids
+    //         .map(async (productId, index) => {
+    //           try {
+    //             const productRes = await fetch(`/api/products/${productId}`);
+    //             if (!productRes.ok) throw new Error(`Product ${productId} not found`);
+    //             const product = await productRes.json();
+
+    //             const quantity = cartData.quantities?.[index] ?? 1;
+    //             const grams = cartData.grams?.[index] ?? 1;
+    //             const finalPrice = cartData.finalPrices?.[index] ?? product.price * grams;
+
+    //             return {
+    //               ...product,
+    //               quantity,
+    //               grams,
+    //               finalPrice,
+    //               itemTotal: finalPrice * quantity
+    //             };
+    //           } catch (err) {
+    //             console.warn(`Skipping invalid product id ${productId}`, err);
+    //             return null; // skip this
+    //           }
+    //         })
+    //     );
+    //     const validItems = items.filter(i => i !== null);
+    //     setCartItems(validItems);
+    //     setTotal(validItems.reduce((sum, i) => sum + i.itemTotal, 0));
+
+    //   } catch (err) {
+    //     console.error('Error fetching cart:', err);
+    //     setToastMsg('Error loading cart. Please try again.');
+    //   }
+    // };
+
     const fetchCart = async () => {
       try {
         const res = await fetch(`/api/cart/${userId}`);
@@ -30,33 +75,42 @@ const Cart = () => {
         const cartData = await res.json();
         console.log('Raw cart data from API:', cartData);
 
-        // Process items with proper array indexing
+        // REFACTOR FIX: Use the new 'items' array instead of old parallel arrays
+        if (!cartData.items || !Array.isArray(cartData.items)) {
+           setCartItems([]);
+           setTotal(0);
+           return;
+        }
+
         const items = await Promise.all(
-          cartData.productIds
-            .filter(pid => pid && typeof pid === 'string' && pid.length > 0) // filter out bad ids
-            .map(async (productId, index) => {
+          cartData.items.map(async (cartItem) => {
               try {
+                // In the new structure, productId is inside the item object
+                const productId = cartItem.productId; 
+                
                 const productRes = await fetch(`/api/products/${productId}`);
                 if (!productRes.ok) throw new Error(`Product ${productId} not found`);
                 const product = await productRes.json();
 
-                const quantity = cartData.quantities?.[index] ?? 1;
-                const grams = cartData.grams?.[index] ?? 1;
-                const finalPrice = cartData.finalPrices?.[index] ?? product.price * grams;
+                // Map fields from the new CartItem object directly
+                const quantity = cartItem.quantity;
+                const grams = cartItem.grams;
+                const finalPrice = cartItem.finalPrice;
 
                 return {
-                  ...product,
-                  quantity,
+                  ...product, // Product details (name, image, etc.)
+                  quantity,   // Cart specific details
                   grams,
                   finalPrice,
                   itemTotal: finalPrice * quantity
                 };
               } catch (err) {
-                console.warn(`Skipping invalid product id ${productId}`, err);
-                return null; // skip this
+                console.warn(`Skipping invalid item`, err);
+                return null;
               }
             })
         );
+
         const validItems = items.filter(i => i !== null);
         setCartItems(validItems);
         setTotal(validItems.reduce((sum, i) => sum + i.itemTotal, 0));
