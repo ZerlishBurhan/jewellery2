@@ -1,26 +1,23 @@
 package com.ecommerce.jewelleryMart.strategy;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class SortStrategyFactory {
 
+    private static final Map<String, SortStrategy> STRATEGIES = new HashMap<>();
+
+    static {
+        STRATEGIES.put("priceLowToHigh", new PriceLowToHighStrategy());
+        STRATEGIES.put("priceHighToLow", new PriceHighToLowStrategy());
+        STRATEGIES.put("nameAsc", new NameAscStrategy());
+        STRATEGIES.put("nameDesc", new NameDescStrategy());
+    }
+
     public static SortStrategy getStrategy(String sort) {
-
-        if (sort == null) return null;
-
-        switch (sort) {
-            case "priceLowToHigh":
-                return new PriceLowToHighStrategy();
-
-            case "priceHighToLow":
-                return new PriceHighToLowStrategy();
-
-            case "nameAsc":
-                return new NameAscStrategy();
-
-            case "nameDesc":
-                return new NameDescStrategy();
-
-            default:
-                return null;
+        if (sort == null) {
+            return null;
         }
+        return STRATEGIES.get(sort);
     }
 }
