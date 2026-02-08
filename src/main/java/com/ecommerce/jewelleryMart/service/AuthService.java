@@ -28,9 +28,9 @@ public class AuthService {
     }
 
     public boolean login(String email, String rawPassword) {
-        Optional<User> user = userRepository.findByEmail(email);
-        return user.isPresent() &&
-                passwordEncoder.matches(rawPassword, user.get().getPassword());
+        Optional<User> user = getUserByEmail(email);
+        return user.isPresent()
+                && passwordEncoder.matches(rawPassword, user.get().getPassword());
     }
 
     public Optional<User> getUserByEmail(String email) {
@@ -38,7 +38,7 @@ public class AuthService {
     }
 
     public Optional<User> updateUsername(String email, String username) {
-        Optional<User> user = userRepository.findByEmail(email);
+        Optional<User> user = getUserByEmail(email);
         user.ifPresent(u -> {
             u.setUsername(username);
             userRepository.save(u);
@@ -47,8 +47,10 @@ public class AuthService {
     }
 
     public boolean resetPassword(String email, String newPassword) {
-        Optional<User> user = userRepository.findByEmail(email);
-        if (user.isEmpty()) return false;
+        Optional<User> user = getUserByEmail(email);
+        if (user.isEmpty()) {
+            return false;
+        }
 
         user.get().setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user.get());
