@@ -110,11 +110,11 @@ const Collections = () => {
         }
 
         // Apply sorting (only if not already sorted by API)
-        if (sort === "weight-asc") {
-          data.sort((a, b) => (a.weight || 0) - (b.weight || 0));
-        } else if (sort === "weight-desc") {
-          data.sort((a, b) => (b.weight || 0) - (a.weight || 0));
-        }
+        // if (sort === "weight-asc") {
+        //   data.sort((a, b) => (a.weight || 0) - (b.weight || 0));
+        // } else if (sort === "weight-desc") {
+        //   data.sort((a, b) => (b.weight || 0) - (a.weight || 0));
+        // }
 
         setProducts(data);
       } else {

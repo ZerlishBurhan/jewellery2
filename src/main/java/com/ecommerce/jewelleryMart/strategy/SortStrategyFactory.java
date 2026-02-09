@@ -10,8 +10,8 @@ public class SortStrategyFactory {
     static {
         STRATEGIES.put("priceLowToHigh", new PriceLowToHighStrategy());
         STRATEGIES.put("priceHighToLow", new PriceHighToLowStrategy());
-        STRATEGIES.put("nameAsc", new NameAscStrategy());
-        STRATEGIES.put("nameDesc", new NameDescStrategy());
+        STRATEGIES.put("weight-asc", new WeightLowToHighStrategy());
+        STRATEGIES.put("weight-desc", new WeightHighToLowStrategy());
     }
 
     public static SortStrategy getStrategy(String sort) {
